@@ -1,6 +1,6 @@
 import MovieCard from "../components/MovieCard";
 import { useState, useEffect } from "react";
-import { getPopularMovies /*,searchMovies*/ } from "../services/api";
+import { getPopularMovies, searchMovies } from "../services/api";
 import '../css/Home.css';
 
 function Home() {
@@ -27,16 +27,29 @@ function Home() {
     }, [])
 
 
-    const handleSearch = (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
-        alert(searchQuery);
-        setSearchQuery('----')
+        if (!searchQuery.trim()) return
+        //if (loading) return
+
+        setLoading(true)
+        try {
+            const searchResults = await searchMovies(searchQuery)
+            setMovies(searchResults.results || searchResults);
+            setError(null)
+        } catch (err) {
+            console.log(err)
+            setError("Failed to search movies...")
+        } finally {
+            setLoading(false)
+        }
     };
 
     return <div className="home">
 
         <form onSubmit={handleSearch} className="search-form">
             <input
+                id="search"
                 type="text"
                 placeholder="Search for movies..."
                 className="search-input"
